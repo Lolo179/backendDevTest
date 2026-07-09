@@ -88,7 +88,7 @@ Acceptance criteria:
 
 ## TASK-004 - Add internal product model
 
-Status: TODO
+Status: DONE
 
 Goal:
 
