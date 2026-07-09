@@ -1,106 +1,146 @@
-# yourApp
+# Similar Products API
 
-## Resumen
+## Overview
 
-Este proyecto contiene una aplicación Spring Boot para el ejercicio técnico de backend.
+This Spring Boot application implements the public endpoint:
 
-Funcionalidad objetivo de la aplicación:
-- GET /product/{productId}/similar
+- `GET /product/{productId}/similar`
 
-El contrato público está definido por similarProducts.yaml.
+The endpoint returns similar product details while preserving the similarity order from downstream IDs.
 
-## Estado actual
+Runtime endpoints:
 
-La base del proyecto está creada y la configuración inicial está aplicada.
+- Application: `http://localhost:5000`
+- Provided mocks: `http://localhost:3001`
 
-En este punto, el endpoint objetivo todavía no se documenta como implementado.
+## Contract-first approach
 
-## Entorno de ejecución
+- Public API contract source: `similarProducts.yaml`.
+- OpenAPI Generator is used to generate the public API interface.
+- The REST controller implements the generated interface to keep implementation and contract aligned.
+- The downstream client (`existingApis.yaml`) is intentionally not generated, so timeout behavior, error mapping, and similar ID normalization remain explicitly controlled in code.
 
-- La aplicación está configurada para ejecutarse en el puerto 5000.
-- La integración downstream consume los mocks proporcionados en http://localhost:3001.
-- Docker Compose del repositorio levanta mocks, k6, InfluxDB y Grafana, pero no levanta la aplicación Spring Boot.
+## Architecture
 
-## Verificacion manual con mocks proporcionados
+The solution follows a lightweight hexagonal architecture:
 
-Objetivo:
+- Domain model: internal `Product`.
+- Application service: use-case orchestration in `SimilarProductsService`.
+- Application port: `ProductApiClient`.
+- Inbound REST adapter: `SimilarProductsController`.
+- Outbound Product API adapter: `ProductApiRestClient`.
+- Infrastructure configuration: typed properties and bean configuration for client and executor.
+- Shared error handling: global HTTP error mapping via `@RestControllerAdvice`.
 
-Verificar manualmente el endpoint publico contra `simulado`, validando orden, omision de fallos individuales y respuesta parcial.
+```mermaid
+flowchart LR
+    Client["Client / k6 / Postman"] -->|GET /product/{productId}/similar| Controller["Inbound REST Adapter<br/>SimilarProductsController"]
+    Controller --> Mapper["MapStruct Mapper<br/>Product -> ProductDetail"]
+    Controller --> Service["Application Service<br/>SimilarProductsService"]
+    Service --> Port["Application Port<br/>ProductApiClient"]
+    Port --> Adapter["Outbound Adapter<br/>ProductApiRestClient"]
+    Adapter -->|GET /product/{id}/similarids| MockSimilarIds["Mock API<br/>/product/{id}/similarids"]
+    Adapter -->|GET /product/{id}| MockProduct["Mock API<br/>/product/{id}"]
+    Service --> Domain["Domain Model<br/>Product"]
+    Controller --> Generated["Generated API Model<br/>ProductDetail"]
+```
 
-Comandos:
+## Functional behavior
 
-1. Levantar mocks e infraestructura de observabilidad (desde la raiz del repositorio):
-	- `docker-compose up -d simulado influxdb grafana`
-2. Verificar que el mock responde:
-	- `curl http://localhost:3001/product/1/similarids`
-3. Arrancar la aplicacion (desde `yourApp`):
-	- `mvn spring-boot:run`
-4. Probar endpoints publicos:
-	- `curl http://localhost:5000/product/1/similar`
-	- `curl http://localhost:5000/product/2/similar`
-	- `curl http://localhost:5000/product/3/similar`
-	- `curl http://localhost:5000/product/4/similar`
-	- `curl http://localhost:5000/product/5/similar`
+- `/product/{productId}/similarids` is mandatory.
+- Failures in mandatory similar IDs retrieval are propagated.
+- Individual `/product/{similarId}` calls are best-effort.
+- Individual detail failures are omitted from the final response.
+- Output preserves original similarity order for successful products.
+- Timeouts are configured to avoid long blocking downstream waits.
+- A dedicated executor is used for controlled concurrency.
 
-Resultados esperados con timeouts iniciales (`read-timeout=1500ms`):
+## Runbook
 
-- product 1 -> productos 2, 3, 4.
-- product 2 -> productos 3, 100 aproximadamente (1000 suele omitirse por timeout).
-- product 3 -> producto 100 aproximadamente (1000 y 10000 suelen omitirse por timeout).
-- product 4 -> productos 1, 2 omitiendo 5 por 404.
-- product 5 -> productos 1, 2 omitiendo 6 por 500.
+### 1) Start provided mocks and observability stack
 
-Nota:
+From repository root:
 
-Los resultados parciales dependen de la estrategia de timeout configurada. Si cambian `connect-timeout` o `read-timeout`, puede variar que productos lentos se incluyan u omitan.
+```bash
+docker-compose up -d simulado influxdb grafana
+```
 
-## Estilo de API y contrato
+### 2) Start application
 
-- La API pública es REST síncrona sobre HTTP.
-- La especificación del contrato es OpenAPI.
-- No se usa AsyncAPI para este caso.
-- Se sigue enfoque API First / contract-first para la API pública.
-- `similarProducts.yaml` se usa como fuente de verdad para la firma del endpoint público.
-- Se usará OpenAPI Generator para generar interfaces del servidor (preferiblemente `interfaceOnly`), no una aplicación completa.
-- El controller implementará la interfaz generada para mantener alineación contrato-código.
+From `yourApp`:
 
-## Arquitectura objetivo
+```bash
+mvn spring-boot:run
+```
 
-La arquitectura prevista para la solución es simple y por capas:
-- Controller
-- Service
-- HTTP Client
-- Configuration
-- Error Handling
+### 3) Run Java tests
 
-Para la integración downstream, el cliente hacia los mocks (`existingApis.yaml`) no se generará con OpenAPI Generator.
+From `yourApp`:
 
-Ese cliente se implementará manualmente con `RestClient` para mantener control explícito de timeouts, errores y normalización de similar IDs.
+```bash
+mvn test
+```
 
-## Concurrencia
+### 4) Manual smoke checks
 
-La concurrencia se aplicará de forma interna para optimizar la obtención de detalles de productos.
+```bash
+curl http://localhost:3001/product/1/similarids
+curl http://localhost:5000/product/1/similar
+curl http://localhost:5000/product/2/similar
+curl http://localhost:5000/product/3/similar
+curl http://localhost:5000/product/4/similar
+curl http://localhost:5000/product/5/similar
+```
 
-Esta decisión no cambia el contrato público ni el estilo síncrono de la API.
+Expected behavior with initial `read-timeout=1500ms`:
 
-## Decisión de modelo y mapping
+- Product 1: products 2, 3, 4.
+- Product 2: typically products 3 and 100 (1000 may be omitted by timeout).
+- Product 3: typically product 100 (1000 and 10000 may be omitted by timeout).
+- Product 4: products 1 and 2, omitting product 5 (404).
+- Product 5: products 1 and 2, omitting product 6 (500).
 
-El modelo interno será `Product`.
+## Postman manual verification
 
-La API pública usa los modelos generados desde OpenAPI (`similarProducts.yaml`).
+- Import collection from: `yourApp/postman/similar-products.postman_collection.json`.
+- Before running it:
+  - Start mocks with `docker-compose up -d simulado influxdb grafana`.
+  - Start app with `mvn spring-boot:run` from `yourApp`.
 
-El mapping de `Product` hacia el `ProductDetail` generado para la API se realizará con MapStruct.
+The collection validates:
 
-MapStruct se elige porque genera código en compilación, evita reflection en runtime y aporta type-safety.
+- Normal scenario.
+- Partial response under slow/timeout behavior.
+- Partial response when an individual product returns 404.
+- Partial response when an individual product returns 500.
+- Order preservation for successful products.
 
-No se usa MapStruct para ocultar complejidad inexistente en downstream.
+## k6 performance test
 
-En el estado actual, el mock downstream y el contrato público comparten la misma forma:
-- id
-- name
-- price
-- availability
+Run from repository root:
 
-Por este motivo, el cliente downstream puede deserializar directamente al modelo interno `Product`.
+```bash
+docker-compose run --rm k6 run scripts/test.js
+```
 
-Si en el futuro el contrato downstream fuera distinto (por ejemplo, integración con un DataService HOST/COBOL), se crearían DTOs downstream específicos y mappers adicionales para desacoplar modelos.
+Dashboard:
+
+- `http://localhost:3000/d/Le2Ku9NMk/k6-performance-test`
+
+k6 scenarios:
+
+- normal: `/product/1/similar`
+- notFound: `/product/4/similar`
+- error: `/product/5/similar`
+- slow: `/product/2/similar`
+- verySlow: `/product/3/similar`
+
+Each scenario runs with 200 VUs.
+
+Observed behavior from recent runs:
+
+- All scenarios complete.
+- Responses are predominantly 200.
+- Slow and verySlow phases increase latency due to mock delays.
+- Timeout and partial response strategy prevents waiting for extreme downstream delays.
+- Occasional 502 responses may appear in `error` scenario under load in some runs; this is documented as an operational observation for possible future tuning.

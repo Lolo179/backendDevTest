@@ -1,0 +1,276 @@
+{
+    "info": {
+        "name": "Similar Products API - Manual Verification",
+        "_postman_id": "9b4e28fb-7a4f-4e88-9a0e-similar-products",
+        "description": "Manual verification collection for the Similar Products backend technical test. It validates the public API against the provided mock scenarios.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:5000"
+        },
+        {
+            "key": "mockBaseUrl",
+            "value": "http://localhost:3001"
+        }
+    ],
+    "item": [
+        {
+            "name": "00 - Mock health - similarids product 1",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{mockBaseUrl}}/product/1/similarids",
+                    "host": [
+                        "{{mockBaseUrl}}"
+                    ],
+                    "path": [
+                        "product",
+                        "1",
+                        "similarids"
+                    ]
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Mock responds with 200', function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test('Mock returns similar IDs [2,3,4]', function () {",
+                            "    const body = pm.response.json();",
+                            "    pm.expect(body).to.eql([2, 3, 4]);",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "01 - Normal scenario - product 1 returns 2,3,4",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{baseUrl}}/product/1/similar",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "product",
+                        "1",
+                        "similar"
+                    ]
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Status is 200', function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test('Response is an array', function () {",
+                            "    pm.expect(pm.response.json()).to.be.an('array');",
+                            "});",
+                            "",
+                            "pm.test('Returns products 2, 3 and 4 in order', function () {",
+                            "    const products = pm.response.json();",
+                            "    const ids = products.map(product => product.id);",
+                            "    pm.expect(ids).to.eql(['2', '3', '4']);",
+                            "});",
+                            "",
+                            "pm.test('Each product has the expected public fields', function () {",
+                            "    const products = pm.response.json();",
+                            "    products.forEach(product => {",
+                            "        pm.expect(product).to.have.property('id');",
+                            "        pm.expect(product).to.have.property('name');",
+                            "        pm.expect(product).to.have.property('price');",
+                            "        pm.expect(product).to.have.property('availability');",
+                            "    });",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "02 - Slow scenario - product 2 returns partial 3,100",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{baseUrl}}/product/2/similar",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "product",
+                        "2",
+                        "similar"
+                    ]
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Status is 200', function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test('Returns partial products 3 and 100 in order', function () {",
+                            "    const products = pm.response.json();",
+                            "    const ids = products.map(product => product.id);",
+                            "    pm.expect(ids).to.eql(['3', '100']);",
+                            "});",
+                            "",
+                            "pm.test('Very slow product 1000 is omitted by timeout strategy', function () {",
+                            "    const ids = pm.response.json().map(product => product.id);",
+                            "    pm.expect(ids).to.not.include('1000');",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "03 - Very slow scenario - product 3 returns partial 100",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{baseUrl}}/product/3/similar",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "product",
+                        "3",
+                        "similar"
+                    ]
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Status is 200', function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test('Returns partial product 100 only', function () {",
+                            "    const products = pm.response.json();",
+                            "    const ids = products.map(product => product.id);",
+                            "    pm.expect(ids).to.eql(['100']);",
+                            "});",
+                            "",
+                            "pm.test('Very slow products 1000 and 10000 are omitted', function () {",
+                            "    const ids = pm.response.json().map(product => product.id);",
+                            "    pm.expect(ids).to.not.include('1000');",
+                            "    pm.expect(ids).to.not.include('10000');",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "04 - Not found detail scenario - product 4 omits product 5",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{baseUrl}}/product/4/similar",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "product",
+                        "4",
+                        "similar"
+                    ]
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Status is 200', function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test('Returns products 1 and 2 in order', function () {",
+                            "    const products = pm.response.json();",
+                            "    const ids = products.map(product => product.id);",
+                            "    pm.expect(ids).to.eql(['1', '2']);",
+                            "});",
+                            "",
+                            "pm.test('Product 5 is omitted because downstream returns 404', function () {",
+                            "    const ids = pm.response.json().map(product => product.id);",
+                            "    pm.expect(ids).to.not.include('5');",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "05 - Error detail scenario - product 5 omits product 6",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{baseUrl}}/product/5/similar",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "product",
+                        "5",
+                        "similar"
+                    ]
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Status is 200', function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test('Returns products 1 and 2 in order', function () {",
+                            "    const products = pm.response.json();",
+                            "    const ids = products.map(product => product.id);",
+                            "    pm.expect(ids).to.eql(['1', '2']);",
+                            "});",
+                            "",
+                            "pm.test('Product 6 is omitted because downstream returns 500', function () {",
+                            "    const ids = pm.response.json().map(product => product.id);",
+                            "    pm.expect(ids).to.not.include('6');",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}

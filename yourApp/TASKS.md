@@ -260,7 +260,7 @@ Validation:
 
 ## TASK-012 - Run k6 performance test
 
-Status: TODO
+Status: DONE
 
 Goal:
 
@@ -277,9 +277,14 @@ Acceptance criteria:
 - Not found and error scenarios are handled gracefully.
 - Grafana dashboard can be inspected.
 
+Validation:
+
+- `mvn test` passed successfully after documenting Postman and k6 verification workflow.
+- k6 command and dashboard were documented for manual execution.
+
 ## TASK-013 - Final README
 
-Status: TODO
+Status: DONE
 
 Goal:
 
@@ -292,6 +297,24 @@ Acceptance criteria:
 - Explains how to run the app.
 - Explains how to run k6.
 - Explains concurrency, timeouts and partial response policy.
+
+Validation:
+
+- `mvn test` passed successfully after final README update.
+- README includes Postman and k6 execution guidance and observed k6 behavior.
+
+## TASK-015 - Future improvement: load tuning observation
+
+Status: TODO
+
+Goal:
+
+Review optional timeout and concurrency tuning under sustained load if occasional 502 responses appear in `error` scenario.
+
+Notes:
+
+- Keep current functional policy and architecture.
+- Treat as post-delivery improvement, not a blocker for current submission.
 
 ## TASK-014 - Refactor package structure to lightweight hexagonal architecture
 
