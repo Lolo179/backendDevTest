@@ -21,6 +21,39 @@ En este punto, el endpoint objetivo todavía no se documenta como implementado.
 - La integración downstream consume los mocks proporcionados en http://localhost:3001.
 - Docker Compose del repositorio levanta mocks, k6, InfluxDB y Grafana, pero no levanta la aplicación Spring Boot.
 
+## Verificacion manual con mocks proporcionados
+
+Objetivo:
+
+Verificar manualmente el endpoint publico contra `simulado`, validando orden, omision de fallos individuales y respuesta parcial.
+
+Comandos:
+
+1. Levantar mocks e infraestructura de observabilidad (desde la raiz del repositorio):
+	- `docker-compose up -d simulado influxdb grafana`
+2. Verificar que el mock responde:
+	- `curl http://localhost:3001/product/1/similarids`
+3. Arrancar la aplicacion (desde `yourApp`):
+	- `mvn spring-boot:run`
+4. Probar endpoints publicos:
+	- `curl http://localhost:5000/product/1/similar`
+	- `curl http://localhost:5000/product/2/similar`
+	- `curl http://localhost:5000/product/3/similar`
+	- `curl http://localhost:5000/product/4/similar`
+	- `curl http://localhost:5000/product/5/similar`
+
+Resultados esperados con timeouts iniciales (`read-timeout=1500ms`):
+
+- product 1 -> productos 2, 3, 4.
+- product 2 -> productos 3, 100 aproximadamente (1000 suele omitirse por timeout).
+- product 3 -> producto 100 aproximadamente (1000 y 10000 suelen omitirse por timeout).
+- product 4 -> productos 1, 2 omitiendo 5 por 404.
+- product 5 -> productos 1, 2 omitiendo 6 por 500.
+
+Nota:
+
+Los resultados parciales dependen de la estrategia de timeout configurada. Si cambian `connect-timeout` o `read-timeout`, puede variar que productos lentos se incluyan u omitan.
+
 ## Estilo de API y contrato
 
 - La API pública es REST síncrona sobre HTTP.

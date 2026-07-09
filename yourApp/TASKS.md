@@ -226,7 +226,7 @@ Minimum cases:
 
 ## TASK-011 - Manual verification with mocks
 
-Status: TODO
+Status: DONE
 
 Goal:
 
@@ -249,6 +249,10 @@ Expected behavior:
 - Product 3 returns product 100 with the initial timeout strategy.
 - Product 4 returns products 1 and 2.
 - Product 5 returns products 1 and 2.
+
+Validation:
+
+- `mvn test` passed successfully after documenting manual verification workflow.
 
 ## TASK-012 - Run k6 performance test
 
