@@ -123,13 +123,53 @@ class SimilarProductsServiceTest {
         // given
         when(productApiClient.getSimilarIds("1")).thenThrow(new ProductApiException("mandatory call failed"));
 
-        // when / then
-        assertThatThrownBy(() -> similarProductsService.getSimilarProducts("1"))
+        // when
+        var thrown = assertThatThrownBy(() -> similarProductsService.getSimilarProducts("1"));
+
+        // then
+        thrown
             .isInstanceOf(ProductApiException.class)
             .hasMessageContaining("mandatory call failed");
 
         verify(productApiClient).getSimilarIds("1");
         verifyNoMoreInteractions(productApiClient);
+    }
+
+    @Test
+    void shouldPropagateNotFoundWhenSimilarIdsFails() {
+        // given
+        when(productApiClient.getSimilarIds("404"))
+            .thenThrow(new ProductNotFoundException("Product 404 not found"));
+
+        // when
+        var thrown = assertThatThrownBy(() -> similarProductsService.getSimilarProducts("404"));
+
+        // then
+        thrown
+            .isInstanceOf(ProductNotFoundException.class)
+            .hasMessageContaining("404");
+
+        verify(productApiClient).getSimilarIds("404");
+        verifyNoMoreInteractions(productApiClient);
+    }
+
+    @Test
+    void shouldReturnOnlySuccessfulProductsWhenMultipleDetailsFail() {
+        // given
+        when(productApiClient.getSimilarIds("1")).thenReturn(List.of("2", "404", "err", "3", "x"));
+        when(productApiClient.getProduct("2")).thenReturn(product("2"));
+        when(productApiClient.getProduct("404")).thenThrow(new ProductNotFoundException("not found"));
+        when(productApiClient.getProduct("err")).thenThrow(new ProductApiException("boom"));
+        when(productApiClient.getProduct("3")).thenReturn(product("3"));
+        when(productApiClient.getProduct("x")).thenThrow(new ProductApiException("downstream unavailable"));
+
+        // when
+        List<Product> result = similarProductsService.getSimilarProducts("1");
+
+        // then
+        assertThat(result)
+            .extracting(Product::id)
+            .containsExactly("2", "3");
     }
 
     private static Product product(String id) {

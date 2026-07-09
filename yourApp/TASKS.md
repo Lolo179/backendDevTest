@@ -208,7 +208,7 @@ Validation:
 
 ## TASK-010 - Add tests
 
-Status: TODO
+Status: DONE
 
 Goal:
 
@@ -223,6 +223,10 @@ Minimum cases:
 - Individual product timeout is omitted if practical to test.
 - Mandatory similar IDs failure propagates.
 - Controller returns expected status.
+
+Validation:
+
+- `mvn test` passed successfully after expanding service and ProductApiRestClient coverage.
 
 ## TASK-011 - Manual verification with mocks
 
