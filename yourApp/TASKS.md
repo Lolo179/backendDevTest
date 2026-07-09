@@ -152,7 +152,7 @@ Notes:
 
 ## TASK-007 - Implement Similar Products service
 
-Status: TODO
+Status: DONE
 
 Goal:
 
