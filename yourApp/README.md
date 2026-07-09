@@ -34,13 +34,13 @@ The solution follows a lightweight hexagonal architecture:
 
 ```mermaid
 flowchart LR
-    Client["Client / k6 / Postman"] -->|GET /product/{productId}/similar| Controller["Inbound REST Adapter<br/>SimilarProductsController"]
-    Controller --> Mapper["MapStruct Mapper<br/>Product -> ProductDetail"]
+  Client["Client / k6 / Postman"] -->|"GET product similar"| Controller["Inbound REST Adapter<br/>SimilarProductsController"]
+  Controller --> Mapper["MapStruct Mapper<br/>Product to ProductDetail"]
     Controller --> Service["Application Service<br/>SimilarProductsService"]
     Service --> Port["Application Port<br/>ProductApiClient"]
     Port --> Adapter["Outbound Adapter<br/>ProductApiRestClient"]
-    Adapter -->|GET /product/{id}/similarids| MockSimilarIds["Mock API<br/>/product/{id}/similarids"]
-    Adapter -->|GET /product/{id}| MockProduct["Mock API<br/>/product/{id}"]
+  Adapter -->|"GET similar ids"| MockSimilarIds["Mock API<br/>/product/{id}/similarids"]
+  Adapter -->|"GET product detail"| MockProduct["Mock API<br/>/product/{id}"]
     Service --> Domain["Domain Model<br/>Product"]
     Controller --> Generated["Generated API Model<br/>ProductDetail"]
 ```
