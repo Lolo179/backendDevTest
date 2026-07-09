@@ -160,3 +160,44 @@ This decision preserves the target architecture:
 - Controller
 - Service
 - HTTP Client
+
+## Decision 015 - No Circuit Breaker in initial scope
+
+The current implementation keeps resilience explicit with timeout configuration and controlled error mapping.
+
+Given the small scope of this technical test, adding Circuit Breaker would increase configuration and operational complexity without being mandatory.
+
+For production hardening, Circuit Breaker around `ProductApiClient` is an appropriate next-step improvement.
+
+## Decision 016 - No default Retry policy
+
+The use case performs fan-out calls for product details.
+
+A default Retry policy can multiply downstream load and worsen instability under pressure.
+
+Retry is only suitable for selective transient failures, with:
+
+- low retry limits
+- exponential backoff
+- jitter
+
+Retry should not be applied to 404 responses.
+
+## Decision 017 - No WebFlux for this implementation
+
+WebFlux/WebClient is a valid option for non-blocking I/O architectures.
+
+For this assessment, Spring MVC with RestClient plus CompletableFuture and a dedicated executor provides sufficient concurrency control with higher implementation clarity.
+
+## Decision 018 - Production-grade resilience roadmap
+
+The current baseline is intentionally simple and test-focused.
+
+For production environments, recommended incremental improvements are:
+
+- Resilience4j CircuitBreaker
+- Bulkhead
+- TimeLimiter
+- selective Retry for transient failures
+- additional metrics and observability
+- optional WebClient/WebFlux migration when end-to-end non-blocking behavior is required

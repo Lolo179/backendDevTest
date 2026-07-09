@@ -55,6 +55,40 @@ flowchart LR
 - Timeouts are configured to avoid long blocking downstream waits.
 - A dedicated executor is used for controlled concurrency.
 
+## Resilience and reactive programming trade-offs
+
+This implementation intentionally prioritizes clarity, determinism, and scope-fit for the current technical test.
+
+Current baseline implemented in code:
+
+- HTTP timeouts in the downstream client.
+- Controlled concurrency with a dedicated executor.
+- Partial response behavior for individual product detail failures.
+- Global error handling.
+- Explicit separation between mandatory similar IDs retrieval and best-effort product detail enrichment.
+
+Scope decisions for this implementation:
+
+- No Circuit Breaker in initial scope.
+  - For this project size, explicit timeout plus error mapping provides predictable behavior.
+  - In production, Circuit Breaker around ProductApiClient would be a strong candidate.
+- No default Retry.
+  - Retry in fan-out flows can amplify downstream pressure because each failed detail call may be multiplied.
+  - Retry should be selective, only for transient errors, with backoff, jitter, and low retry limits.
+  - Retry should not be applied to 404 responses.
+- No WebFlux/WebClient for this implementation.
+  - Reactive non-blocking I/O is a valid alternative.
+  - For this test, Spring MVC plus RestClient plus CompletableFuture plus a dedicated executor was chosen for readability and delivery scope.
+
+Production-grade improvements (next step candidates):
+
+- Resilience4j CircuitBreaker.
+- Bulkhead.
+- TimeLimiter.
+- Selective Retry with backoff and jitter.
+- Additional application metrics.
+- Optional WebClient/WebFlux migration if end-to-end non-blocking processing is required.
+
 ## Runbook
 
 ### 1) Start provided mocks and observability stack
