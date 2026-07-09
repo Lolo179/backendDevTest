@@ -52,8 +52,10 @@ k6 calls the local application through:
 Responsibilities:
 
 - Expose the REST endpoint.
+- Implement the generated server API interface from `similarProducts.yaml`.
 - Map path variables.
 - Delegate to the service.
+- Convert internal `Product` models to generated API `ProductDetail` models through a mapper.
 - Return the response body.
 
 The controller must not contain orchestration logic.
@@ -68,6 +70,8 @@ Responsibilities:
 - Preserve ordering.
 - Apply partial failure policy.
 
+The service works with the internal `Product` model.
+
 ### HTTP Client
 
 Responsibilities:
@@ -75,6 +79,19 @@ Responsibilities:
 - Call the external mock API.
 - Encapsulate URL construction and HTTP mapping.
 - Convert downstream failures into controlled exceptions.
+- Keep explicit control of timeout and error behavior.
+
+The downstream client is implemented manually with `RestClient`.
+
+`existingApis.yaml` is used as reference contract, but its client is not code-generated.
+
+The downstream client deserializes into internal `Product` while contracts remain shape-compatible.
+
+## Mapping strategy
+
+Mapping from internal `Product` to generated API `ProductDetail` is explicit in the API layer.
+
+MapStruct is used to generate compile-time mapping code with type-safe signatures.
 
 ### Configuration
 
@@ -113,3 +130,13 @@ If a product detail fails, the application omits that item and returns the remai
 The list returned by `/similarids` is ordered by similarity.
 
 The final response must preserve that order for successfully retrieved products.
+
+## Contract-first strategy
+
+The public API is API First.
+
+`similarProducts.yaml` is the source of truth for public endpoint signatures.
+
+OpenAPI Generator is used to generate server API interfaces (preferably `interfaceOnly`).
+
+The controller implements those generated interfaces to reduce drift between code and contract.

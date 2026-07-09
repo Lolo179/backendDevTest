@@ -86,13 +86,13 @@ Acceptance criteria:
 - Properties are type-safe where useful.
 - Application context loads.
 
-## TASK-004 - Add internal product model
+## TASK-004 - Add internal Product model
 
 Status: DONE
 
 Goal:
 
-Create the internal representation of product details.
+Create the internal `Product` model used by service/client layers.
 
 Fields:
 
@@ -107,9 +107,25 @@ Acceptance criteria:
 - `price` uses `BigDecimal`.
 - No unnecessary DTO layers are introduced.
 
-## TASK-005 - Implement Product API client
+## TASK-005 - Generate public API interfaces from OpenAPI
 
-Status: TODO
+Status: DONE
+
+Goal:
+
+Adopt API First for the public contract using OpenAPI Generator over `similarProducts.yaml`.
+
+Acceptance criteria:
+
+- OpenAPI Generator configuration is added for server-side generation.
+- Generation is interface-focused (`interfaceOnly`) if supported by selected generator.
+- No full application scaffold is generated.
+- Generated API interfaces can be implemented by the Spring controller.
+- No downstream client is generated from `existingApis.yaml`.
+
+## TASK-006 - Implement Product API client
+
+Status: DONE
 
 Goal:
 
@@ -126,8 +142,15 @@ Acceptance criteria:
 - Uses configured timeouts.
 - Maps 404 and downstream failures to controlled exceptions.
 - Does not expose RestClient details to the service.
+- Normalizes similar IDs from downstream payload to `List<String>`.
+- Adds mapping from internal `Product` to generated API `ProductDetail` through MapStruct.
 
-## TASK-006 - Implement Similar Products service
+Notes:
+
+- Implement manually with `RestClient`.
+- Do not generate downstream client from `existingApis.yaml`.
+
+## TASK-007 - Implement Similar Products service
 
 Status: TODO
 
@@ -144,7 +167,7 @@ Acceptance criteria:
 - Omits failed individual product details.
 - Preserves the original similarity order.
 
-## TASK-007 - Implement REST controller
+## TASK-008 - Implement REST controller
 
 Status: TODO
 
@@ -157,10 +180,11 @@ Expose:
 Acceptance criteria:
 
 - Returns a JSON array of product details.
+- Implements the generated API interface from `similarProducts.yaml`.
 - Delegates to the service.
 - Contains no business orchestration logic.
 
-## TASK-008 - Implement error handling
+## TASK-009 - Implement error handling
 
 Status: TODO
 
@@ -174,7 +198,7 @@ Acceptance criteria:
 - Downstream technical failures from mandatory `/similarids` map to a controlled error.
 - Unexpected errors do not leak stack traces.
 
-## TASK-009 - Add tests
+## TASK-010 - Add tests
 
 Status: TODO
 
@@ -192,7 +216,7 @@ Minimum cases:
 - Mandatory similar IDs failure propagates.
 - Controller returns expected status.
 
-## TASK-010 - Manual verification with mocks
+## TASK-011 - Manual verification with mocks
 
 Status: TODO
 
@@ -218,7 +242,7 @@ Expected behavior:
 - Product 4 returns products 1 and 2.
 - Product 5 returns products 1 and 2.
 
-## TASK-011 - Run k6 performance test
+## TASK-012 - Run k6 performance test
 
 Status: TODO
 
@@ -237,7 +261,7 @@ Acceptance criteria:
 - Not found and error scenarios are handled gracefully.
 - Grafana dashboard can be inspected.
 
-## TASK-012 - Final README
+## TASK-013 - Final README
 
 Status: TODO
 
