@@ -44,8 +44,11 @@ class SimilarProductsControllerTest {
         when(similarProductsService.getSimilarProducts("1")).thenReturn(products);
         when(productDetailApiMapper.toApiList(products)).thenReturn(apiProducts);
 
-        // when / then
-        mockMvc.perform(get("/product/{productId}/similar", "1"))
+        // when
+        var result = mockMvc.perform(get("/product/{productId}/similar", "1"));
+
+        // then
+        result
             .andExpect(status().isOk())
             .andExpect(jsonPath("$").isArray())
             .andExpect(jsonPath("$[0].name").value("product-2"))
@@ -68,8 +71,11 @@ class SimilarProductsControllerTest {
         when(similarProductsService.getSimilarProducts("1")).thenReturn(products);
         when(productDetailApiMapper.toApiList(products)).thenReturn(apiProducts);
 
-        // when / then
-        mockMvc.perform(get("/product/{productId}/similar", "1"))
+        // when
+        var result = mockMvc.perform(get("/product/{productId}/similar", "1"));
+
+        // then
+        result
             .andExpect(status().isOk())
             .andExpect(jsonPath("$").isArray())
             .andExpect(jsonPath("$.length()").value(0));
@@ -103,11 +109,15 @@ class SimilarProductsControllerTest {
         when(similarProductsService.getSimilarProducts("404"))
             .thenThrow(new ProductNotFoundException("Product 404 not found"));
 
-        // when / then
-        mockMvc.perform(get("/product/{productId}/similar", "404"))
+        // when
+        var result = mockMvc.perform(get("/product/{productId}/similar", "404"));
+
+        // then
+        result
             .andExpect(status().isNotFound())
             .andExpect(jsonPath("$.status").value(404))
-            .andExpect(jsonPath("$.detail").value("Product not found"));
+            .andExpect(jsonPath("$.detail").value("Product not found"))
+            .andExpect(jsonPath("$.trace").doesNotExist());
     }
 
     @Test
@@ -116,11 +126,15 @@ class SimilarProductsControllerTest {
         when(similarProductsService.getSimilarProducts("1"))
             .thenThrow(new ProductApiException("Downstream 5xx"));
 
-        // when / then
-        mockMvc.perform(get("/product/{productId}/similar", "1"))
+        // when
+        var result = mockMvc.perform(get("/product/{productId}/similar", "1"));
+
+        // then
+        result
             .andExpect(status().isBadGateway())
             .andExpect(jsonPath("$.status").value(502))
-            .andExpect(jsonPath("$.detail").value("Downstream service error"));
+            .andExpect(jsonPath("$.detail").value("Downstream service error"))
+            .andExpect(jsonPath("$.trace").doesNotExist());
     }
 
     @Test
@@ -129,13 +143,17 @@ class SimilarProductsControllerTest {
         when(similarProductsService.getSimilarProducts("1"))
             .thenThrow(new RuntimeException("boom"));
 
-        // when / then
-        mockMvc.perform(get("/product/{productId}/similar", "1"))
+        // when
+        var result = mockMvc.perform(get("/product/{productId}/similar", "1"));
+
+        // then
+        result
             .andExpect(status().isInternalServerError())
             .andExpect(jsonPath("$.status").value(500))
             .andExpect(jsonPath("$.detail").value("Internal server error"))
             .andExpect(jsonPath("$.instance").value("/product/1/similar"))
-            .andExpect(jsonPath("$.title", containsString("Internal")));
+            .andExpect(jsonPath("$.title", containsString("Internal")))
+            .andExpect(jsonPath("$.trace").doesNotExist());
     }
 
     private static Product product(String id) {

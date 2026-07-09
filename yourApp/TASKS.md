@@ -202,6 +202,10 @@ Acceptance criteria:
 - Downstream technical failures from mandatory `/similarids` map to a controlled error.
 - Unexpected errors do not leak stack traces.
 
+Validation:
+
+- `mvn test` passed successfully after Global Error Handling verification.
+
 ## TASK-010 - Add tests
 
 Status: TODO
