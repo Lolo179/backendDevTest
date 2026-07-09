@@ -1,3 +1,16 @@
 spring:
   application:
     name: yourapp
+
+server:
+  port: 5000
+
+external:
+  product-api:
+    base-url: ${PRODUCT_API_BASE_URL:http://localhost:3001}
+    connect-timeout: 500ms
+    read-timeout: 1500ms
+
+similar-products:
+  client:
+    max-concurrency: 100

@@ -61,7 +61,7 @@ Acceptance criteria:
 
 ## TASK-003 - Configure application properties
 
-Status: TODO
+Status: DONE
 
 Goal:
 
