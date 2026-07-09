@@ -18,7 +18,7 @@ Notes:
 
 ## TASK-001 - Add project guidance documentation
 
-Status: TODO
+Status: DONE
 
 Goal:
 
@@ -39,7 +39,7 @@ Acceptance criteria:
 
 ## TASK-002 - Create Spring Boot application skeleton
 
-Status: TODO
+Status: DONE
 
 Goal:
 
