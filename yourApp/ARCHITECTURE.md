@@ -45,24 +45,38 @@ k6 calls the local application through:
 7. The service returns the successful products preserving the original order.
 8. The controller returns a JSON array.
 
-## Layers
+## Lightweight hexagonal structure
 
-### Controller
+The project uses a lightweight hexagonal architecture to separate use-case orchestration from transport and infrastructure concerns, without introducing unnecessary abstractions.
 
-Responsibilities:
+Package structure:
+
+- `com.myapp.similarproducts.domain.model`
+	- Internal domain model (`Product`).
+- `com.myapp.similarproducts.application.port`
+	- Application ports (`ProductApiClient`) consumed by use cases.
+- `com.myapp.similarproducts.application.service`
+	- Use-case orchestration (`SimilarProductsService`).
+- `com.myapp.similarproducts.infrastructure.inbound.rest`
+	- Inbound HTTP adapter (`SimilarProductsController`) and API mapper (`ProductDetailApiMapper`).
+- `com.myapp.similarproducts.infrastructure.outbound.productapi`
+	- Outbound HTTP adapter (`ProductApiRestClient`) and controlled downstream exceptions.
+- `com.myapp.similarproducts.infrastructure.config`
+	- Configuration properties and infrastructure beans.
+- `com.myapp.similarproducts.shared.error`
+	- Global error handling (`GlobalExceptionHandler`).
+
+### Inbound REST adapter responsibilities
 
 - Expose the REST endpoint.
 - Implement the generated server API interface from `similarProducts.yaml`.
 - Map path variables.
-- Delegate to the service.
+- Delegate to the application service.
 - Convert internal `Product` models to generated API `ProductDetail` models through a mapper.
-- Return the response body.
 
-The controller must not contain orchestration logic.
+Inbound adapters must not contain orchestration logic.
 
-### Service
-
-Responsibilities:
+### Application service responsibilities
 
 - Coordinate the use case.
 - Fetch similar product IDs.
@@ -70,11 +84,7 @@ Responsibilities:
 - Preserve ordering.
 - Apply partial failure policy.
 
-The service works with the internal `Product` model.
-
-### HTTP Client
-
-Responsibilities:
+### Outbound product API adapter responsibilities
 
 - Call the external mock API.
 - Encapsulate URL construction and HTTP mapping.

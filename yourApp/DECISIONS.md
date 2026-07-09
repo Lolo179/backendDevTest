@@ -103,16 +103,21 @@ The contract defines `price` as a number.
 
 The application will represent price with `BigDecimal` to avoid floating point precision issues for monetary values.
 
-## Decision 012 - Keep the architecture simple
+## Decision 012 - Keep the architecture simple with lightweight hexagonal packaging
 
-Use a simple layered architecture:
+Use a lightweight hexagonal architecture to separate responsibilities while keeping implementation small and pragmatic.
 
-- Controller
-- Service
-- HTTP Client
-- Configuration
-- Error Handling
-- Tests
+Package organization:
+
+- `domain.model`
+- `application.port`
+- `application.service`
+- `infrastructure.inbound.rest`
+- `infrastructure.outbound.productapi`
+- `infrastructure.config`
+- `shared.error`
+
+This is a structural refactor only and must not change functional behavior, endpoint contract, or resilience policy.
 
 Do not introduce database, messaging, JPA, Kafka or heavy domain abstractions.
 

@@ -1,4 +1,4 @@
-package com.myapp.similarproducts.config;
+package com.myapp.similarproducts.infrastructure.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

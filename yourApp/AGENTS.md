@@ -84,3 +84,17 @@ Before implementing a task:
 - Preserve product order from `/similarids`.
 - Avoid `parallelStream`.
 - Avoid unbounded concurrency.
+
+## Testing rules
+
+- All new or modified tests must use explicit sections:
+	- `// given`
+	- `// when`
+	- `// then`
+- Test names must describe observable behavior, not implementation details.
+- Prefer expressive assertions (AssertJ and MockMvc matchers).
+- Do not test irrelevant internal details.
+- Do not add sleeps or fragile concurrency tests.
+- Controller tests must validate HTTP contract, status and basic response shape.
+- Service tests must validate functional rules: ordering, partial response and propagation of mandatory-call failures.
+- Mapper tests must validate field-by-field transformation.

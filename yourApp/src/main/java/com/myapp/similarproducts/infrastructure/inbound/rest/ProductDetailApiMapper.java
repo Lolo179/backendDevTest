@@ -1,6 +1,6 @@
-package com.myapp.similarproducts.api;
+package com.myapp.similarproducts.infrastructure.inbound.rest;
 
-import com.myapp.similarproducts.model.Product;
+import com.myapp.similarproducts.domain.model.Product;
 import java.util.List;
 import org.mapstruct.Mapper;
 

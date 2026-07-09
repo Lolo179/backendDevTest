@@ -1,4 +1,4 @@
-package com.myapp.similarproducts.model;
+package com.myapp.similarproducts.domain.model;
 
 import java.math.BigDecimal;
 

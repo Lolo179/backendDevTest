@@ -1,4 +1,4 @@
-package com.myapp.similarproducts.config;
+package com.myapp.similarproducts.infrastructure.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

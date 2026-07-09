@@ -1,9 +1,9 @@
-package com.myapp.similarproducts.service;
+package com.myapp.similarproducts.application.service;
 
-import com.myapp.similarproducts.client.ProductApiClient;
-import com.myapp.similarproducts.client.ProductApiException;
-import com.myapp.similarproducts.client.ProductNotFoundException;
-import com.myapp.similarproducts.model.Product;
+import com.myapp.similarproducts.application.port.ProductApiClient;
+import com.myapp.similarproducts.domain.model.Product;
+import com.myapp.similarproducts.infrastructure.outbound.productapi.ProductApiException;
+import com.myapp.similarproducts.infrastructure.outbound.productapi.ProductNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;

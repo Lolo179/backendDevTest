@@ -1,6 +1,6 @@
-package com.myapp.similarproducts.client;
+package com.myapp.similarproducts.application.port;
 
-import com.myapp.similarproducts.model.Product;
+import com.myapp.similarproducts.domain.model.Product;
 import java.util.List;
 
 public interface ProductApiClient {

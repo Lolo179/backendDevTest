@@ -1,4 +1,4 @@
-package com.myapp.similarproducts.client;
+package com.myapp.similarproducts.infrastructure.outbound.productapi;
 
 public class ProductNotFoundException extends RuntimeException {
 

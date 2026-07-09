@@ -169,7 +169,7 @@ Acceptance criteria:
 
 ## TASK-008 - Implement REST controller
 
-Status: TODO
+Status: DONE
 
 Goal:
 
@@ -184,9 +184,13 @@ Acceptance criteria:
 - Delegates to the service.
 - Contains no business orchestration logic.
 
+Notes:
+
+- Controller tests should use explicit Given / When / Then structure for readability.
+
 ## TASK-009 - Implement error handling
 
-Status: TODO
+Status: DONE
 
 Goal:
 
@@ -276,3 +280,29 @@ Acceptance criteria:
 - Explains how to run the app.
 - Explains how to run k6.
 - Explains concurrency, timeouts and partial response policy.
+
+## TASK-014 - Refactor package structure to lightweight hexagonal architecture
+
+Status: DONE
+
+Goal:
+
+Refactor package structure to:
+
+- `domain.model`
+- `application.port`
+- `application.service`
+- `infrastructure.inbound.rest`
+- `infrastructure.outbound.productapi`
+- `infrastructure.config`
+- `shared.error`
+
+Acceptance criteria:
+
+- Refactor is structural only (no functional behavior changes).
+- Public API contract and error policy remain unchanged.
+- Tests pass after the refactor.
+
+Validation:
+
+- `mvn test` passed successfully after package and import updates.

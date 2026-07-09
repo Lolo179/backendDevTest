@@ -1,4 +1,4 @@
-package com.myapp.similarproducts.service;
+package com.myapp.similarproducts.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -9,10 +9,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import com.myapp.similarproducts.client.ProductApiClient;
-import com.myapp.similarproducts.client.ProductApiException;
-import com.myapp.similarproducts.client.ProductNotFoundException;
-import com.myapp.similarproducts.model.Product;
+import com.myapp.similarproducts.application.port.ProductApiClient;
+import com.myapp.similarproducts.domain.model.Product;
+import com.myapp.similarproducts.infrastructure.outbound.productapi.ProductApiException;
+import com.myapp.similarproducts.infrastructure.outbound.productapi.ProductNotFoundException;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;

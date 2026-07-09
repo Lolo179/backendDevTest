@@ -1,4 +1,4 @@
-package com.myapp.similarproducts.config;
+package com.myapp.similarproducts.infrastructure.config;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

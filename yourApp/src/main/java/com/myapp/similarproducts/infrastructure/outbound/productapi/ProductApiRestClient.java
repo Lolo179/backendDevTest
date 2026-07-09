@@ -1,6 +1,7 @@
-package com.myapp.similarproducts.client;
+package com.myapp.similarproducts.infrastructure.outbound.productapi;
 
-import com.myapp.similarproducts.model.Product;
+import com.myapp.similarproducts.application.port.ProductApiClient;
+import com.myapp.similarproducts.domain.model.Product;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
