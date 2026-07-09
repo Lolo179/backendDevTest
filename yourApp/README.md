@@ -144,3 +144,46 @@ Observed behavior from recent runs:
 - Slow and verySlow phases increase latency due to mock delays.
 - Timeout and partial response strategy prevents waiting for extreme downstream delays.
 - Occasional 502 responses may appear in `error` scenario under load in some runs; this is documented as an operational observation for possible future tuning.
+
+## Proposed CI (not implemented yet)
+
+Current status:
+
+- A backend CI workflow is not implemented yet in this repository.
+
+Recommended minimal CI scope:
+
+- Trigger on pull requests and pushes to main.
+- Use Java 21.
+- Cache Maven dependencies.
+- Run backend verification with:
+
+```bash
+mvn -f yourApp/pom.xml -B test
+```
+
+Out of scope for now (to avoid overengineering):
+
+- Automatic deployment.
+- Heavy quality gates beyond build and tests.
+- Full performance gating in CI.
+
+## Proposed traceability and observability improvements (not implemented yet)
+
+Current status:
+
+- k6 metrics can be visualized in Grafana through the provided stack.
+- Application-level request traceability is limited to current logs.
+
+Recommended next steps:
+
+- Add request correlation ID in inbound requests and propagate it to downstream calls.
+- Include correlation ID in structured logs for controller, service, and outbound adapter events.
+- Add minimal application metrics (request count, error count, request duration by endpoint and status).
+- Create a focused Grafana dashboard for API behavior (`2xx`, `4xx`, `5xx`, latency percentiles, timeout-related errors).
+
+Benefits:
+
+- Faster root-cause analysis when intermittent `502` appears under load.
+- Better visibility of partial-response behavior in slow and verySlow scenarios.
+- Clearer evidence during technical review and future tuning.
