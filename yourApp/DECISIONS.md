@@ -1,12 +1,12 @@
 # DECISIONS.md
 
-## Decision 001 - Use OpenAPI REST, not AsyncAPI
+## Decision 001 - Use OpenAPI REST contract-first
 
 The public contract is synchronous REST over HTTP.
 
 The provided contracts are OpenAPI documents and all interactions are request/response HTTP calls.
 
-AsyncAPI is not appropriate because there is no event broker, topic, queue or publish/subscribe workflow.
+The implementation follows a contract-first approach where `similarProducts.yaml` defines the public API signature.
 
 Internal concurrency does not change the external API contract.
 
